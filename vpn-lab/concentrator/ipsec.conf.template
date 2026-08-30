@@ -1,0 +1,32 @@
+# Generado a partir de .env por entrypoint.sh — no editar a mano.
+config setup
+    uniqueids=yes
+
+conn branch-node
+    type=tunnel
+    auto=add
+    keyexchange=ikev2
+    dpdaction=clear
+    dpddelay=${IPSEC_DPD_DELAY}
+    dpdtimeout=${IPSEC_DPD_TIMEOUT}
+    keyingtries=%forever
+
+    # Este contenedor emula el concentrador: IP fija conocida por el nodo
+    # (right= en el .env de la Pi). NAT-T forzado porque el nodo remoto
+    # (Raspberry Pi) suele estar detrás de un dispositivo NAT.
+    left=%any
+    leftid=${CONCENTRATOR_ID}
+    leftsubnet=${CONCENTRATOR_SUBNET}
+    leftauth=psk
+
+    # El nodo remoto usa IP dinámica (left=%defaultroute en su ipsec.conf),
+    # por eso right=%any aquí: este lado solo responde.
+    right=%any
+    rightid=${NODE_ID}
+    rightsubnet=${NODE_SUBNET}
+    rightauth=psk
+
+    ike=${IKE_PROPOSAL}!
+    esp=${ESP_PROPOSAL}!
+
+    forceencaps=yes

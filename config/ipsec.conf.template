@@ -1,0 +1,29 @@
+# Generado a partir de .env por scripts/05-configure-ipsec.sh — no editar a mano.
+config setup
+    charondebug="ike 1, knl 1, cfg 1"
+    uniqueids=yes
+
+conn backup-link
+    type=tunnel
+    auto=start
+    keyexchange=ikev2
+    dpdaction=restart
+    dpddelay=${IPSEC_DPD_DELAY}
+    dpdtimeout=${IPSEC_DPD_TIMEOUT}
+    closeaction=restart
+    keyingtries=%forever
+
+    # El lado local usa la IP dinámica que entrega el proveedor de Internet
+    # (sesión "dial up" vía WiFi); el concentrador remoto tiene IP fija.
+    left=%defaultroute
+    leftid=${IPSEC_LOCAL_ID}
+    leftsubnet=${IPSEC_LOCAL_SUBNET}
+    leftauth=psk
+
+    right=${IPSEC_VPN_CONCENTRATOR_IP}
+    rightid=${IPSEC_REMOTE_ID}
+    rightsubnet=${IPSEC_REMOTE_SUBNET}
+    rightauth=psk
+
+    ike=${IPSEC_IKE_PROPOSAL}!
+    esp=${IPSEC_ESP_PROPOSAL}!
