@@ -201,7 +201,22 @@ journalctl -u strongswan-starter -f
   (`eth0`): `/30` o `/31` para conexión directa, `/29` o menor si hay un
   switch de por medio. En el caso de acceso por puerto de consola, no hay
   red L3 hacia el switch; en su lugar, la IP propia del nodo se asigna a
-  una interfaz loopback `/32` y esa es la que se usa como origen.
+  una interfaz loopback `/32` (`LOOPBACK_IP`, cualquier dirección que tenga
+  sentido para la organización — no depende de ningún valor fijo en los
+  scripts) y esa es la que se usa como origen.
+- **Ruta hacia la subred remota (necesaria para pings/diagnóstico locales)**:
+  sin una ruta explícita, el kernel elige como IP origen la del enlace WiFi
+  (`%defaultroute`) al intentar alcanzar `IPSEC_REMOTE_SUBNET` desde la
+  propia Pi, en vez de `ETH_LOCAL_IP`/`LOOPBACK_IP` — el paquete entonces no
+  calza con el selector `leftsubnet` de IPSEC y sale sin cifrar por la ruta
+  por defecto (falla también `scripts/07-check-branch.sh`). Por eso
+  `scripts/03-configure-ethernet.sh` instala automáticamente, para los tres
+  modos (`direct`/`switch`/`console`), una ruta hacia `IPSEC_REMOTE_SUBNET`
+  con el origen correcto (`ensure_remote_subnet_route` en `lib/common.sh`).
+  Si `IPSEC_REMOTE_SUBNET` todavía no está definido cuando corres
+  `03-configure-ethernet.sh` (por ejemplo, en un primer paso completando
+  `.env` por partes), el script lo avisa y basta con volver a ejecutarlo una
+  vez completada esa sección.
 - **Por qué Raspberry Pi 4 Model B (2GB)**: a diferencia de la Zero 2 W, la 4B
   trae puerto **RJ45 Ethernet integrado** (`eth0`, además a Gigabit real por
   no compartir bus con USB como en la 3 B+), por lo que los modos `direct` y

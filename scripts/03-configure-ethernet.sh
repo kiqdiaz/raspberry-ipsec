@@ -38,6 +38,8 @@ case "$mode" in
         ip addr flush dev "$iface"
         ip addr add "${ETH_LOCAL_IP}/${cidr}" dev "$iface"
         ip link set "$iface" up
+
+        ensure_remote_subnet_route "$iface" "${ETH_LOCAL_IP}"
         ;;
     console)
         require_cmd ip
@@ -52,6 +54,8 @@ case "$mode" in
         ip addr flush dev "$loif"
         ip addr add "${lip}/32" dev "$loif"
         ip link set "$loif" up
+
+        ensure_remote_subnet_route "$loif" "$lip"
 
         log "Recordatorio: el acceso físico al switch es por puerto de consola (${CONSOLE_DEVICE:-/dev/ttyUSB0}, ${CONSOLE_BAUD:-9600} baud)."
         log "La IP ${lip}/32 identifica a este nodo para el túnel IPSEC, no hay adyacencia L3 directa con el switch."
