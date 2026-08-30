@@ -79,13 +79,35 @@ Para una Raspberry Pi 4 Model B (2GB), sin salida de video ni periféricos, usar
 ## 2. Instalar el proyecto en la Raspberry Pi
 
 ```bash
-# En la Raspberry Pi (por SSH)
+# En la Raspberry Pi (por SSH), como el usuario normal del equipo (no root)
 sudo mkdir -p /opt/raspi-backup-link
 sudo chown "$USER":"$USER" /opt/raspi-backup-link
-# copiar el contenido de este repo a /opt/raspi-backup-link (scp, git clone, rsync, etc.)
 
+git clone https://github.com/kiqdiaz/raspberry-ipsec.git /opt/raspi-backup-link
 cd /opt/raspi-backup-link
+```
+
+### Permisos de archivos
+
+`/opt` pertenece a `root` por defecto; por eso el `chown` previo lo entrega al
+usuario que despliega, para poder clonar sin `sudo`. Los scripts, en cambio,
+sí necesitan privilegios de root para tocar red/IPSEC y se invocan con
+`sudo` de forma explícita (ver sección 4) — no hace falta cambiar el dueño
+del proyecto a `root`.
+
+Git preserva el bit de ejecución de `scripts/*.sh` y `lib/common.sh` (quedan
+en `100755` en el repo), así que tras el clon deberían verse ejecutables:
+
+```bash
+ls -l scripts/*.sh lib/common.sh
+# si algún archivo aparece sin el bit "x" (por ejemplo tras copiarlo a mano
+# con scp/rsync en vez de clonar), restaurarlo con:
+chmod +x scripts/*.sh lib/common.sh
+```
+
+```bash
 cp .env.example .env
+chmod 600 .env   # solo el dueño puede leer/escribir: contiene el PSK de IPSEC y la clave WiFi
 nano .env   # completar SSID/clave WiFi, modo Ethernet, parámetros IPSEC y branch de prueba
 ```
 
